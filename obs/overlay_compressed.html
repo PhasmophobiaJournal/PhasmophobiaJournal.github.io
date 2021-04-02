@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Journal Overlay</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Gentium+Basic&family=Indie+Flower&family=Roboto&display=swap" rel="stylesheet">
+
 </head>
 <body id="body" class="light">
     <script>
@@ -160,7 +161,21 @@
         *{
             padding: 0;
             margin: 0;
+        }
+        .roboto-font{
+            font-family: 'Roboto', sans-serif;
+        }
+        .indieflower-font{
+            font-family: 'Indie Flower', cursive;
+        }
+        .gentiumbasic-font{
+            font-family: 'Gentium Basic', serif;
+        }
+        .archivoblack-font{
             font-family: 'Archivo Black', sans-serif;
+        }
+        .display-none{
+            display: none !important;
         }
         i{
             font-style: normal;
@@ -172,6 +187,7 @@
             background-color: rgba(0, 0, 0, 0);
             background-color: transparent;
         }
+
         .light .title{
             background-color: rgba(255, 255, 255, 0.7);
             color: #222222;
@@ -239,13 +255,6 @@
             transition: opacity 0.3s;
         }
 
-        .hide-evidence .evidence-section{
-            display: none;
-        }
-        .hide-ghosts .ghosts-section{
-            display: none;
-        }
-
     </style>
     <style id="custom_styles">
 
@@ -253,15 +262,27 @@
     <style id="advanced_styles">
 
     </style>
-    <div class="container">
+    <div class="container archivoblack-font" id="main_container">
         <div id="section_handler">
-            <div class="evidence-section">
+            <div class="ghostname-section" id="gn_s">
+                <p class="title">Ghost Name</p>
+                <div class="evidence-container">
+                    <p class="evidence-text list-item" id="ghost_personal_name">Name</p>
+                </div>
+            </div>
+            <div class="ghostresponse-section" id="gr_s">
+                <p class="title">Ghost Response</p>
+                <div class="evidence-container">
+                    <p class="evidence-text list-item" id="ghost_response"></p>
+                </div>
+            </div>
+            <div class="evidence-section" id="ef_s">
                 <p class="title">Evidence Found</p>
                 <div class="evidence-container" id="evidence_container">
                     <p class="evidence-text list-item">Evidence 1</p>
                 </div>
             </div>
-            <div class="ghosts-section">
+            <div class="ghosts-section" id="mg_s">
                 <p class="title">Matching Ghosts <i id="ghost_count"></i></p>
                 <div class="ghost-name">
                     <i id="ghost_name" listid="0" class="list-item">Phantom</i>
@@ -280,14 +301,27 @@
             }
 
             //hides/shows sections
-            let hidden_section = localStorage.getItem('compressed_hide_section');
-            let sections_container = document.getElementById('section_handler');
-            if (hidden_section == null) {
-                sections_container.className = "";
+            let sections = ["gn", "gr", "ef", "mg"];
+            sections.forEach(element => {
+                
+                if (localStorage.getItem("compressed_display_"+element) == "false") {
+                    document.getElementById(element+'_s').classList.add("display-none");
+                }
+                else{
+                    document.getElementById(element+'_s').classList.remove("display-none");
+                }
+                
+            });
+
+            //Changes font family
+            let fontfamily;
+            if (localStorage.getItem('compressed_ff') != null) {
+                fontfamily = localStorage.getItem('compressed_ff');
             }
             else{
-                sections_container.className = hidden_section;
+                fontfamily = "archivoblack-font";
             }
+            document.getElementById('main_container').className = "container "+fontfamily;
 
             //Changes font sizes
             let header_fs = localStorage.getItem('compressed_header_fs');
@@ -404,9 +438,37 @@
             }, 500);
 
         }
+        function printGhostResponse() {
+            let element = document.getElementById('ghost_response');
+            let response_value = "Unknown";
+            try {
+                if (localStorage.getItem('ghostResponse').length > 0) {
+                    response_value = localStorage.getItem('ghostResponse');
+                }
+            } catch (error) {
+                
+            }
+            element.innerHTML = response_value;
+            //ghost_personal_name
+        }
+        function printGhostPersonalName() {
+            let element = document.getElementById('ghost_personal_name');
+            let ghostName_value = "Unknown Name";
+            try {
+                if (localStorage.getItem('ghostName').length > 0) {
+                    ghostName_value = localStorage.getItem('ghostName');
+                }
+            } catch (error) {
+                
+            }
+            element.innerHTML = ghostName_value;
+            //ghost_personal_name
+        }
         function update() {
             renderTheme();
             getEvidence();
+            printGhostResponse();
+            printGhostPersonalName();
         }
         update();
         printPossibleGhosts();

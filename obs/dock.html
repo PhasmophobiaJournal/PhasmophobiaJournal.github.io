@@ -306,6 +306,23 @@
                 <option value="6">Finger Prints</option>
             </select>
         </div>
+        <br>
+        <div class="evidence-section">
+            <label for="ghostResponse">Ghost Response:</label>
+            <select id="ghostResponse" class="memory-input" reloadreset="true">
+                <option value="Unknown" selected>Unknown</option>
+                <option value="Alone">Alone</option>
+                <option value="Group">Group</option>
+            </select>
+        </div>
+        <br>
+        <div class="evidence-section">
+            <label for="ghostName">Ghost Name:</label>
+            <br>
+            <br>
+            <input type="text" id="ghostName" class="memory-input" reloadreset="true">
+        </div>
+        <br>
         <button class="reset-evidence" onclick="location.reload();">Reset</button>
         <p class="title2">Matching Ghosts</p>
         <ol id="ghosts_list">
@@ -331,11 +348,23 @@
         </div>
 
         <div class="theme-option">
-            <label for="compressed_hide_section">Show:</label>
-            <select id="compressed_hide_section" class="memory-input">
-                <option value="" selected>Evidence and Ghosts</option>
-                <option value="hide-evidence">Only Ghosts</option>
-                <option value="hide-ghosts">Only Evidence</option>
+            <input type="checkbox" id="compressed_display_gn" class="memory-input" checked> <label for="compressed_display_gn"> Show "Ghost Name" Section</label>
+            <br><br>
+            <input type="checkbox" id="compressed_display_gr" class="memory-input" checked> <label for="compressed_display_gr"> Show "Ghost Response" Section</label>
+            <br><br>
+            <input type="checkbox" id="compressed_display_ef" class="memory-input" checked> <label for="compressed_display_ef"> Show "Evidence Found" Section</label>
+            <br><br>
+            <input type="checkbox" id="compressed_display_mg" class="memory-input" checked> <label for="compressed_display_mg"> Show "Matching Ghosts" Section</label>
+        </div>
+
+        <div class="theme-option">
+            <label for="compressed_ff">Font Family:</label>
+            <br><br>
+            <select id="compressed_ff" class="memory-input">
+                <option value="archivoblack-font" selected>Archivo Black</option>
+                <option value="gentiumbasic-font">Gentium Basic (Phasmophobia)</option>
+                <option value="indieflower-font"> Indie Flower</option>
+                <option value="roboto-font">Roboto</option>
             </select>
         </div>
 
@@ -514,22 +543,50 @@
             }
         }
         function saveOnMemory(element) {
-            localStorage.setItem(element.id, element.value);
+            
+            let key = element.id;
+            let data = element.value;
+            if (element.type == "checkbox") {/*Special case for checkbox inputs, the relevant data is not the value but the checked attribute*/
+                data = element.checked;
+            }
+
+            localStorage.setItem(key, data);
             updateSliderValue(element);
             toggleAiOAdvancedStyles();
         }
         function loadFromMemory(element) {
             let saved_value = localStorage.getItem(element.id);
+
+            let reloadreset = element.getAttribute('reloadreset'); /*If this is true the element's saved value will be ignored when the page is reloaded and instead of loading the saved value the default value will be applied*/
+
             try {
-                if (saved_value.length > 0) {
-                element.value = saved_value;
+                if (saved_value.length > 0 && reloadreset != "true") {
+                    if (element.type == "checkbox") {/*Special case for checkbox inputs, the relevant data is not the value but the checked attribute*/
+                        element.checked = (saved_value == "true");
+                    }
+                    else{
+                        element.value = saved_value;
+                    }
                 }
                 else{/*loads the deault values into the memory*/
-                    localStorage.setItem(element.id, element.value);
+                    if (element.type == "checkbox") {/*Special case for checkbox inputs, the relevant data is not the value but the checked attribute*/
+                        localStorage.setItem(element.id, element.checked);
+                    }
+                    else{
+                        localStorage.setItem(element.id, element.value);
+                    }
                 }
             } catch (error) {
-                /*this isn't actually redundant by nature but it might be for the existent use cases*/
-                localStorage.setItem(element.id, element.value);
+                /*this isn't actually redundant by nature but it might be for the existent use cases (turns out it isn't redundant, read below vvvvv)*/
+                /*upon further inspection it seems like this gets run whenever the document loads for the first time or theres a new Item/input/element added and so this is the section of the code responsible of loading the default values into the memory for the first time, this is needed so overlay_compressed.html and similar documents (dependent on the memory to render) load correctly*/
+                /*this gets loaded whenever a new localStorage item gets initialized for the first time*/
+
+                if (element.type == "checkbox") {/*Special case for checkbox inputs, the relevant data is not the value but the checked attribute*/
+                    localStorage.setItem(element.id, element.checked);
+                }
+                else{
+                    localStorage.setItem(element.id, element.value);
+                }
             }
             
             updateSliderValue(element);
